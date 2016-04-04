@@ -1,0 +1,82 @@
+=========================================
+| Specification for the GLT file format |
+|              Version 1.0              |
+=========================================
+
+* Introduction:
+    GLT, acronym for "OpenGL Texture", is a file
+    format designed to store texture data in its
+    raw, uncompressed format, in order to be
+    loaded and used with ease by graphical
+    applications.
+
+    Files are composed by one main segment and
+    blocks, composed by:
+        - File signature. (6 bytes)
+        - Texture header. (24 bytes)
+        - Texture data.   (Variable size)
+
+    These segments are going to be further
+    explained in the "Anatomy" section.
+
+* Anatomy:
+    * File signature:
+        |---------|------------------------------------------------|-------|
+        | Length  | Description                                    | Value |
+        |---------|------------------------------------------------|-------|
+        | 1 byte  | Helps prevent the file from being read as text | 0x00  |
+        | 3 bytes | File signature, encoded in ASCII               | "GLT" |
+        | 1 byte  | File's major specification version             | 0x01  |
+        | 1 byte  | File's minor specification version             | 0x00  |
+        |---------|------------------------------------------------|-------|
+
+        For a signature to be valid the first 4 bytes must exactly match
+        "Value", other values are optional. Matching major and minor versions
+        are not required, but it is recommended that their values are checked
+        as to assure compatibility.
+
+    * Texture header:
+        |---------|------------------------------------------------|
+        | Length  | Description                                    |
+        |---------|------------------------------------------------|
+        | 8 bytes | Texture's width                                |
+        | 8 bytes | Texture's height                               |
+        |---------|------------------------------------------------|
+        | 8 bytes | Pixel format.                                  |
+        |         | Determines the composition (And size) of each  |
+        |         | element in the "Texture data" section.         |
+        |---------|------------------------------------------------|
+
+        Accepted values for pixel format are:
+            0 | R G B A | 4 bytes
+            1 | B G R A | 4 bytes
+
+    * Texture data:
+        All image data, in raw format, is stored here.
+
+        - Pixels:
+            This section can be broken in pixels, each vary in size
+            according to the specified format.
+            The formula for pixel length is:
+                Component Size * Number of Components
+
+
+            The read order for pixel data is from the left to the right,
+            top to bottom.
+
+            Reading from left to right implies that, in little-endian systems,
+            the bytes must be either flipped or read in the reverse order.
+                (R G B A => A B G R)
+
+        - Length:
+            As an example, the formula for the GL_RGBA format is:
+                1 byte per component * 4 components (R, G, B and A) = 4 bytes
+
+            Thus, the formula that determines this section's length is:
+                Pixel Length * Width * Height
+
+            Keep in mind the result of this formula might not be protected from
+            integer overflow, so, in such case, the behavior is undefined.
+
+            If this section's length is less than the value returned by the
+            above formula, the remaining space is filled with zeros.
