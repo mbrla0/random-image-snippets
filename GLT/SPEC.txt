@@ -48,8 +48,8 @@
         |---------|------------------------------------------------|
 
         Accepted values for pixel format are:
-            0 | R G B A | 4 bytes
-            1 | B G R A | 4 bytes
+            0: RGBA, 4 bytes per pixel
+            1: BGRA, 4 bytes per pixel
 
     * Texture data:
         All image data, in raw format, is stored here.
